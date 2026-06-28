@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # 👉 EDIT — change this to your real address once your site is live.
-Sitemap: https://your-username.github.io/your-repo/sitemap.xml
+Sitemap: https://christian-y-wu.github.io/portfolio-starter-kit/sitemap.xml

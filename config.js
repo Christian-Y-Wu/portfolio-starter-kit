@@ -66,12 +66,24 @@ const SITE = {
   },
 
   /* ===================================================================
+     ===== COMMUNITY  (where this template comes from) ================
+     ===================================================================
+     A friendly link to the portfolio community — a place to find more
+     templates, get help, and share the site you build. It appears in
+     the "Start here" box while you set up. Set show: false to hide it. */
+  community: {
+    show: true,
+    label: "Portfolio Community",
+    url: "https://example.com/portfolio-community",   // 👉 EDIT — the community's web address
+  },
+
+  /* ===================================================================
      ===== SITE / SEO  (how your site looks in Google & when shared) ==
      ===================================================================
      Fill these in once your site is online. The url is the address
      people will visit (you get it from GitHub Pages — see the README). */
   site: {
-    url: "https://your-username.github.io/your-repo/",   // 👉 EDIT — your live web address
+    url: "https://christian-y-wu.github.io/portfolio-starter-kit/",   // 👉 EDIT — your live web address
     title: "Alex Doe — Personal Portfolio",              // 👉 EDIT — shows in the browser tab & Google
     description:                                          // 👉 EDIT — 1 sentence Google shows under your title
       "Welcome to my personal portfolio — my projects, my story, and how to get in touch.",
@@ -85,7 +97,7 @@ const SITE = {
   nav: {
     brand: "Alex Doe",       // 👉 EDIT — your name or logo text (top-left)
     showThemeToggle: true,   // the light/dark switch
-    showDotRail: false,      // OPTIONAL fancy dots on the right that track your scroll (advanced)
+    showDotRail: true,       // the little dots on the right that show which section you're in (set false to hide)
   },
 
   /* ===================================================================

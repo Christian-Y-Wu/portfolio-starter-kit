@@ -37,12 +37,12 @@
    ===================================================================== */
 :root {
   /* Colours (light mode). Dark-mode versions are in section 3. */
-  --bg:        #ffffff;   /* page background */
-  --bg-subtle: #f8fafc;   /* slightly tinted background (cards behind cards) */
+  --bg:        #fbfcfe;   /* page background (a hair off-white so white cards pop) */
+  --bg-subtle: #f1f4fa;   /* slightly tinted background (cards behind cards) */
   --card:      #ffffff;   /* card background */
   --text:      #0f172a;   /* main text colour (ink) */
-  --muted:     #64748b;   /* secondary / quieter text */
-  --border:    #e6e8ee;   /* hairlines & card borders */
+  --muted:     #5b6678;   /* secondary / quieter text */
+  --border:    #e5e9f2;   /* hairlines & card borders */
 
   /* Shape & spacing */
   --radius:      16px;     /* corner roundness for cards & buttons */
@@ -55,9 +55,9 @@
           Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
 
   /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.05);
-  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.12);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.12);
 
   /* Animation timing */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -257,7 +257,18 @@ textarea:focus-visible, [tabindex]:focus-visible {
 /* =====================================================================
    9. HERO + AT-A-GLANCE CARD
    ===================================================================== */
-.hero { padding-block: clamp(2.5rem, 8vh, 5.5rem) clamp(2rem, 6vh, 4rem); }
+.hero {
+  position: relative;
+  padding-block: clamp(2.5rem, 8vh, 5.5rem) clamp(2rem, 6vh, 4rem);
+  /* a soft, calm accent glow at the top — gentle in light mode, richer in dark */
+  background:
+    radial-gradient(120% 70% at 50% -25%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 62%);
+}
+:root[data-theme="dark"] .hero {
+  background:
+    radial-gradient(120% 70% at 50% -25%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 60%);
+}
+.hero > .container { position: relative; z-index: 1; }
 .hero__grid {
   display: grid; gap: clamp(2rem, 5vw, 3.5rem);
   grid-template-columns: 1.1fr 0.9fr; align-items: center;
@@ -569,7 +580,21 @@ textarea:focus-visible, [tabindex]:focus-visible {
 .guide__swatch-dot--sunset { background: #ea580c; }
 .guide__swatch-dot--violet { background: #7c3aed; }
 .guide__hint { margin-top: 0.9rem; font-size: 0.88rem; color: var(--muted); }
-.guide__foot { margin-top: 0.55rem; font-size: 0.85rem; color: var(--muted); }
+.guide__next { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px dashed var(--border); }
+.guide__next-title { font-weight: 700; font-size: 0.92rem; }
+.guide__next-list {
+  list-style: none; margin: 0.6rem 0 0; padding: 0;
+  display: grid; gap: 0.45rem; font-size: 0.9rem; color: var(--muted);
+}
+.guide__next-list strong { color: var(--text); }
+.guide__community {
+  display: inline-flex; align-items: center; gap: 0.4rem; margin-top: 0.95rem;
+  padding: 0.55rem 0.95rem; border-radius: 999px; text-decoration: none;
+  font-weight: 600; font-size: 0.88rem; color: var(--on-accent); background: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+.guide__community:hover { filter: brightness(1.06); box-shadow: var(--shadow-md); }
+.guide__foot { margin-top: 0.9rem; font-size: 0.85rem; color: var(--muted); }
 
 /* =====================================================================
    20. BACK-TO-TOP & DOT-RAIL
@@ -587,12 +612,37 @@ textarea:focus-visible, [tabindex]:focus-visible {
 
 .dot-rail {
   position: fixed; right: 1.4rem; top: 50%; transform: translateY(-50%); z-index: 80;
-  display: flex; flex-direction: column; gap: 0.7rem;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem;
 }
-.dot-rail a { width: 11px; height: 11px; border-radius: 999px; background: var(--border); transition: background 0.2s, transform 0.2s; }
-.dot-rail a:hover { transform: scale(1.3); }
-.dot-rail a.is-active { background: var(--accent); transform: scale(1.25); }
+.dot-rail a {
+  position: relative; display: block;
+  width: 11px; height: 11px; border-radius: 999px;
+  background: var(--border); transition: background 0.2s, transform 0.2s;
+}
+.dot-rail a:hover, .dot-rail a:focus-visible { transform: scale(1.35); background: var(--muted); }
+.dot-rail a.is-active { background: var(--accent); transform: scale(1.3); }
+/* the section name that slides out when you hover/focus a dot */
+.dot-rail__label {
+  position: absolute; right: 1.5rem; top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  white-space: nowrap; font-size: 0.78rem; font-weight: 600; color: var(--text);
+  background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  padding: 0.2rem 0.65rem; box-shadow: var(--shadow-sm);
+  opacity: 0; pointer-events: none; transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+}
+.dot-rail a:hover .dot-rail__label,
+.dot-rail a:focus-visible .dot-rail__label {
+  opacity: 1; transform: translateY(-50%) translateX(0);
+}
 @media (max-width: 1100px) { .dot-rail { display: none; } }
+
+/* Reading-progress bar (top of the page) */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 200;
+  transform: scaleX(0); transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  will-change: transform;
+}
 
 /* =====================================================================
    21. SCROLL-REVEAL ANIMATION
@@ -637,7 +687,7 @@ textarea:focus-visible, [tabindex]:focus-visible {
    ===================================================================== */
 @media print {
   :root { --bg: #fff; --card: #fff; --text: #000; --muted: #333; --border: #bbb; }
-  .navbar, .dot-rail, .back-to-top, .scroll-hint, .skip-link, .guide,
+  .navbar, .dot-rail, .back-to-top, .scroll-hint, .skip-link, .guide, .scroll-progress,
   .hero__cta, .nav-toggle, .contact-form, .footer__credit { display: none !important; }
   body { font-size: 11pt; line-height: 1.4; }
   .reveal { opacity: 1 !important; transform: none !important; }

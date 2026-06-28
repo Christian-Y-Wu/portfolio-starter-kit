@@ -7,7 +7,9 @@ You change one file — **`config.js`** — and the whole site updates.
 
 ![Screenshot of the portfolio template — replace with your own](assets/img/og-image.svg)
 
-> **Live demo:** _add your link here once it's online_ → `https://your-username.github.io/your-repo/`
+> **🔴 Live demo:** https://christian-y-wu.github.io/portfolio-starter-kit/
+>
+> **🌟 Part of the Portfolio Community** — a friendly place to find more templates, ask for help, and share the site you build. Come say hi → https://example.com/portfolio-community *(link coming soon)*
 
 ---
 
@@ -33,6 +35,7 @@ Save the file, then refresh the page in your browser. That's it.
 - 📱 **Looks great on phones and laptops** (360px → 1440px), with light & dark mode.
 - 🎨 **4 ready-made colour palettes** — switch by changing one word.
 - 🧭 **A built-in “Start here” helper** right on the page that walks you through your first edits (with one-click colour previews) — and disappears in one line when you're done.
+- 📍 **A reading-progress bar and a side rail** so visitors always see which section they're in and how far down the page they are.
 - 🙂 **Generic, anyone-can-use example content** — student, designer, writer, maker, career-changer. It's not tied to any one job, so it's easy to make it *yours*.
 - 🧩 **Every section a portfolio needs**: hero, about, "now", experience, education, skills, projects, writing, references, and contact.
 - ♿ **Accessible & fast** — keyboard-friendly, screen-reader labels, respects "reduce motion", prints as a tidy résumé.
@@ -298,6 +301,34 @@ repo: {
 ```
 
 ---
+
+## Ideas for more sections (when you're ready)
+
+Your portfolio can grow with you. These are sections people love to add — all using the **same pattern you already have** (one entry in the `sections` list + a matching block of content). Start simple; come back for these later.
+
+- **📸 Photo gallery** — a grid of your favourite shots or work.
+- **📚 Reading list / bookshelf** — what you're reading or recommend.
+- **🧰 A “/uses” page** — the gear, apps, and setup you use every day.
+- **🗺️ Travel map** — places you've been or want to go.
+- **🎵 Playlists** — what you listen to while you work.
+- **💬 Favourite quotes** — words that have stuck with you.
+- **🙌 Volunteering** — causes you care about.
+- **📰 A real blog** — turn the Writing section into full posts (see [GROWING.md](GROWING.md)).
+- **📣 “What I'm open to”** — a clear call-to-action for opportunities.
+
+> Not sure how? Ask an AI assistant: *“Add a new ‘Volunteering’ section after Experience, following the same pattern as the Education section.”*
+
+## Your next steps — a simple roadmap
+
+No rush — do these in order, whenever you like:
+
+1. ✏️ **Make it yours** — edit the 6 quick-start fields, then work through the rest of `config.js`.
+2. 🎨 **Pick your look** — try the four palettes, or set your own colours in `css/styles.css`.
+3. 🖼️ **Add real images** — your photo, project pictures, a share image, and your CV.
+4. 🌐 **Go live** — deploy to GitHub Pages (steps above).
+5. 🧩 **Add a section or two** — from the ideas just above.
+6. 🚀 **Grow (optional)** — a contact form, a CMS, or a database later (see [GROWING.md](GROWING.md)).
+7. 🌟 **Share it** — post your new site in the **[Portfolio Community](https://example.com/portfolio-community)** and help the next beginner get started.
 
 ## Keeping your copy up to date
 

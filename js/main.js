@@ -409,7 +409,7 @@
         icon("github") + esc(f.repo.label || "GitHub") + "</a>"
       : "";
     const credit = f.showCredit !== false
-      ? '<p class="footer__credit">Built with the <a href="https://github.com/your-username/your-repo" ' +
+      ? '<p class="footer__credit">Built with the <a href="https://github.com/Christian-Y-Wu/portfolio-starter-kit" ' +
         'target="_blank" rel="noopener">Starter</a> portfolio template.</p>'
       : "";
     return (
@@ -452,10 +452,25 @@
             '<div class="guide__swatches">' + swatches + "</div>" +
           "</div>" +
           '<p class="guide__hint" id="guide-hint">Tip: click a colour to preview it instantly. To keep one, set <code>palette: "…"</code> in <code>config.js</code>.</p>' +
+          '<div class="guide__next">' +
+            '<p class="guide__next-title">When you\'re ready, you can go further:</p>' +
+            '<ul class="guide__next-list">' +
+              '<li>🎨 Choose your <strong>own colours</strong> — edit the variables at the top of <code>css/styles.css</code> (the README shows how).</li>' +
+              '<li>🧩 Add <strong>more sections</strong> — a photo gallery, a reading list, a “/uses” page… ideas are in the README.</li>' +
+              '<li>🗄️ Grow into a <strong>database or CMS</strong> later — your content lives in one place, so it\'s an easy swap (see GROWING.md).</li>' +
+            "</ul>" +
+            communityLink() +
+          "</div>" +
           '<p class="guide__foot">Want the full walkthrough? It\'s in the <strong>README</strong>. All done? Set <code>guide.show: false</code> in <code>config.js</code> to remove this box for good.</p>' +
         "</aside>" +
       "</div>"
     );
+  }
+  function communityLink() {
+    const c = SITE.community || {};
+    if (c.show === false || !c.url) return "";
+    return '<a class="guide__community" href="' + esc(c.url) + '" target="_blank" rel="noopener">' +
+      "✨ Find more templates &amp; join the " + esc(c.label || "community") + " →</a>";
   }
 
   /* ===================================================================
@@ -523,9 +538,10 @@
     target.focus({ preventScroll: true });
   });
 
-  // ---- Back-to-top + sticky navbar shadow --------------------------
+  // ---- Reading progress + back-to-top + sticky navbar shadow -------
   const backTop = document.getElementById("back-to-top");
   const navbarEl = document.getElementById("navbar");
+  const progressEl = document.getElementById("scroll-progress");
   if (backTop) {
     backTop.hidden = false;
     backTop.innerHTML = icon("arrow-up");
@@ -534,16 +550,23 @@
     });
   }
   let ticking = false;
+  function updateScroll() {
+    const y = window.scrollY || window.pageYOffset;
+    if (navbarEl) navbarEl.classList.toggle("is-stuck", y > 8);
+    if (backTop) backTop.classList.toggle("is-visible", y > 600);
+    if (progressEl) {
+      const el = document.documentElement;
+      const max = el.scrollHeight - el.clientHeight;
+      progressEl.style.transform = "scaleX(" + (max > 0 ? Math.min(1, y / max) : 0) + ")";
+    }
+    ticking = false;
+  }
   window.addEventListener("scroll", function () {
     if (ticking) return;
     ticking = true;
-    requestAnimationFrame(function () {
-      const y = window.scrollY || window.pageYOffset;
-      if (navbarEl) navbarEl.classList.toggle("is-stuck", y > 8);
-      if (backTop) backTop.classList.toggle("is-visible", y > 600);
-      ticking = false;
-    });
+    requestAnimationFrame(updateScroll);
   }, { passive: true });
+  updateScroll();   // set the initial state
 
   // ---- Scroll-reveal animation -------------------------------------
   const reveals = document.querySelectorAll(".reveal");
@@ -566,7 +589,8 @@
   if (dotRail && SITE.nav && SITE.nav.showDotRail) {
     dotRail.hidden = false;
     dotRail.innerHTML = (SITE.sections || []).filter(function (s) { return s.show; }).map(function (s) {
-      return '<a href="#' + s.id + '" aria-label="' + esc(s.nav) + '" title="' + esc(s.nav) + '"></a>';
+      return '<a href="#' + s.id + '" aria-label="' + esc(s.nav) + '">' +
+        '<span class="dot-rail__label">' + esc(s.nav) + "</span></a>";
     }).join("");
   }
 
