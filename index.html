@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!--
+  ===========================================================================
+  You normally DON'T need to edit this file.  All of your content lives in
+  config.js — edit that instead.  The page below builds itself from it.
+
+  The only things here you might touch are the SEO/sharing tags in <head>,
+  and only if you want perfect previews when sharing your link. The README
+  "swap favicon + OG image" recipe walks you through it. Most people can
+  ignore this file completely.
+  ===========================================================================
+-->
+<html lang="en" data-palette="slate">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ===== SEO: shown in the browser tab and in Google ===================
+       These also get refreshed from config.js when the page loads, so for
+       normal use you can edit config.js. Keep these matching for the best
+       previews on social media (those scanners don't run JavaScript). -->
+  <title>Alex Doe — Personal Portfolio</title>
+  <meta name="description" content="Welcome to my personal portfolio — my projects, my story, and how to get in touch." />
+  <link rel="canonical" href="https://your-username.github.io/your-repo/" />
+
+  <!-- ===== Sharing: Open Graph (Facebook, LinkedIn, etc.) ================ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Alex Doe — Personal Portfolio" />
+  <meta property="og:description" content="Welcome to my personal portfolio — my projects, my story, and how to get in touch." />
+  <meta property="og:url" content="https://your-username.github.io/your-repo/" />
+  <meta property="og:image" content="assets/img/og-image.svg" />
+
+  <!-- ===== Sharing: Twitter / X card ===================================== -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Alex Doe — Personal Portfolio" />
+  <meta name="twitter:description" content="Welcome to my personal portfolio — my projects, my story, and how to get in touch." />
+  <meta name="twitter:image" content="assets/img/og-image.svg" />
+
+  <!-- ===== Icons & theme colour ========================================= -->
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/img/icon-192.svg" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta name="theme-color" content="#0f172a" />
+
+  <!-- ===== Search engines: tell them who this page is about ============== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Alex Doe",
+    "url": "https://your-username.github.io/your-repo/",
+    "sameAs": [
+      "https://github.com/your-username",
+      "https://linkedin.com/in/your-name"
+    ]
+  }
+  </script>
+
+  <!-- ===== Anti-flash: set light/dark BEFORE the page paints =============
+       Tiny inline script so dark-mode users never see a white flash.
+       It just reads your saved choice (or your device setting). -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("theme");          // "light" | "dark" | null
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var mode = saved || (prefersDark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", mode);
+      } catch (e) { /* private mode / storage off — light is fine */ }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <!-- Skip link: lets keyboard users jump straight to the content -->
+  <a class="skip-link" href="#content">Skip to content</a>
+
+  <!-- The navbar is built by main.js from config.js -->
+  <header id="navbar" class="navbar" aria-label="Primary"></header>
+
+  <!-- OPTIONAL dot-rail (off by default; turn on in config → nav.showDotRail) -->
+  <nav id="dot-rail" class="dot-rail" aria-label="Section navigation" hidden></nav>
+
+  <!-- Everything (hero + sections) is rendered here by main.js -->
+  <main id="content"></main>
+
+  <!-- The footer is built by main.js -->
+  <footer id="site-footer" class="footer"></footer>
+
+  <!-- "Back to top" button (appears after you scroll) -->
+  <button id="back-to-top" class="back-to-top" type="button" aria-label="Back to top" hidden></button>
+
+  <!-- 1) your content, then 2) the code that renders it. Keep this order. -->
+  <script src="config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

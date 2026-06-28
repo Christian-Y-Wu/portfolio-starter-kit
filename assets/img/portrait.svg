@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Portrait placeholder">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef2f7"/>
+      <stop offset="1" stop-color="#dde4ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#g)"/>
+  <g fill="#b6c1d2">
+    <circle cx="300" cy="240" r="92"/>
+    <path d="M140 470c0-88 72-150 160-150s160 62 160 150v60H140z"/>
+  </g>
+  <text x="300" y="556" text-anchor="middle" font-family="system-ui, sans-serif" font-size="26" font-weight="600" fill="#8a96a8">Your photo · replace portrait.svg</text>
+</svg>

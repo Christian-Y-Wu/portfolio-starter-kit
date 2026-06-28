@@ -1,0 +1,21 @@
+# This is a plain static site — there's almost nothing to ignore.
+# These entries just keep junk out of your repo if you add tools later.
+
+# Secrets — NEVER commit these (see GROWING.md "Sensitive info & secrets")
+.env
+.env.*
+!.env.example
+
+# Operating system clutter
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor folders
+.vscode/
+.idea/
+
+# Logs & dependency folders (only appear if you add build tools later)
+node_modules/
+npm-debug.log*
+*.log
