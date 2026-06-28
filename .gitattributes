@@ -1,0 +1,14 @@
+# Normalise line endings for text files (stored as LF in the repo).
+* text=auto
+
+# Treat these as binary so Git never changes their bytes (prevents
+# corrupting your PDF, images, fonts, etc. when cloned across systems).
+*.pdf  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
