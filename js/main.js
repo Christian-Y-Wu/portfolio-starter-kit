@@ -299,6 +299,24 @@
       }).join("") + "</ul>";
     },
 
+    stats: function (d) {
+      return '<div class="stats__grid reveal">' + (d.items || []).map(function (it) {
+        return '<div class="stat"><div class="stat__value" data-value="' + esc(it.value) + '">' + esc(it.value) + "</div>" +
+          '<div class="stat__label">' + esc(it.label) + "</div></div>";
+      }).join("") + "</div>";
+    },
+
+    gallery: function (d) {
+      return '<div class="gallery__grid reveal">' + (d.items || []).map(function (it, idx) {
+        const cap = it.caption || "";
+        return '<button class="gallery__item" type="button" data-full="' + esc(it.image) + '" data-caption="' + esc(cap) +
+          '" aria-label="' + esc(cap || ("Open photo " + (idx + 1))) + '">' +
+          '<img src="' + esc(it.image) + '" alt="' + esc(cap || ("Gallery photo " + (idx + 1))) + '" loading="lazy">' +
+          (cap ? '<span class="gallery__caption">' + esc(cap) + "</span>" : "") +
+          "</button>";
+      }).join("") + "</div>";
+    },
+
     experience: timeline,
     education: timeline,
 
@@ -380,9 +398,13 @@
 
   function renderSection(reg) {
     const data = SITE[reg.id];
+    if (!data) return "";
     const renderer = RENDERERS[reg.id];
-    if (!data || !renderer) return "";
-    const body = renderer(data);
+    // Known section? use its renderer. Otherwise, if the section provides
+    // raw "html" (e.g. an embedded map/video/tool), drop it in as-is.
+    let body = "";
+    if (renderer) body = renderer(data);
+    else if (typeof data.html === "string") body = '<div class="embed reveal">' + data.html + "</div>";
     if (!body) return "";
     return (
       '<section class="section" id="' + reg.id + '" aria-labelledby="' + reg.id + '-title">' +
@@ -607,6 +629,77 @@
       entries.forEach(function (entry) { if (entry.isIntersecting) setActive(entry.target.id); });
     }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
     sectionEls.forEach(function (s) { spy.observe(s); });
+  }
+
+  // ---- Gallery lightbox (click a photo to enlarge it) --------------
+  const galleryItems = document.querySelectorAll(".gallery__item");
+  if (galleryItems.length) {
+    const lb = document.createElement("div");
+    lb.className = "lightbox";
+    lb.hidden = true;
+    lb.setAttribute("role", "dialog");
+    lb.setAttribute("aria-modal", "true");
+    lb.setAttribute("aria-label", "Image viewer");
+    lb.innerHTML =
+      '<button class="lightbox__close" type="button" aria-label="Close image viewer">' + icon("close") + "</button>" +
+      '<figure class="lightbox__figure"><img class="lightbox__img" alt=""><figcaption class="lightbox__caption"></figcaption></figure>';
+    document.body.appendChild(lb);
+    const lbImg = lb.querySelector(".lightbox__img");
+    const lbCap = lb.querySelector(".lightbox__caption");
+    const lbClose = lb.querySelector(".lightbox__close");
+    let lastFocused = null;
+
+    function openLightbox(src, caption, alt) {
+      lbImg.src = src; lbImg.alt = alt || caption || "";
+      lbCap.textContent = caption || "";
+      lbCap.style.display = caption ? "" : "none";
+      lb.hidden = false;
+      document.body.style.overflow = "hidden";
+      lastFocused = document.activeElement;
+      lbClose.focus();
+    }
+    function closeLightbox() {
+      lb.hidden = true;
+      document.body.style.overflow = "";
+      if (lastFocused && lastFocused.focus) lastFocused.focus();
+    }
+    galleryItems.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const img = btn.querySelector("img");
+        openLightbox(btn.getAttribute("data-full"), btn.getAttribute("data-caption"), img ? img.alt : "");
+      });
+    });
+    lbClose.addEventListener("click", closeLightbox);
+    lb.addEventListener("click", function (e) { if (e.target === lb) closeLightbox(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !lb.hidden) closeLightbox(); });
+  }
+
+  // ---- Stats count-up (gentle; respects reduced-motion) ------------
+  const statValues = document.querySelectorAll(".stat__value");
+  if (statValues.length && !reduceMotion && "IntersectionObserver" in window) {
+    const parseStat = function (txt) {
+      const m = String(txt).match(/^(\D*)(\d[\d,]*)(.*)$/);
+      return m ? { prefix: m[1], num: parseInt(m[2].replace(/,/g, ""), 10), suffix: m[3] } : null;
+    };
+    const run = function (el) {
+      const p = parseStat(el.getAttribute("data-value"));
+      if (!p) return;
+      const dur = 1100, start = performance.now();
+      (function step(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = p.prefix + Math.round(p.num * eased).toLocaleString() + p.suffix;
+        if (t < 1) requestAnimationFrame(step);
+      })(start);
+    };
+    const sObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { run(e.target); sObs.unobserve(e.target); } });
+    }, { threshold: 0.4 });
+    statValues.forEach(function (el) {
+      const p = parseStat(el.getAttribute("data-value"));
+      if (p) el.textContent = p.prefix + "0" + p.suffix;   // start from zero, no flash of the final number
+      sObs.observe(el);
+    });
   }
 
   // ---- Optional typewriter on the hero name ------------------------

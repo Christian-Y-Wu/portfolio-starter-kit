@@ -143,10 +143,12 @@ const SITE = {
   sections: [
     { id: "about",        nav: "About",        show: true  },
     { id: "now",          nav: "Now",          show: true  },  // safe to delete
+    { id: "stats",        nav: "Highlights",   show: false },  // safe to delete · "by the numbers" — set true to show
     { id: "experience",   nav: "Experience",   show: true  },
     { id: "education",    nav: "Education",     show: true  },
     { id: "skills",       nav: "Skills",       show: true  },
     { id: "projects",     nav: "Projects",     show: true  },
+    { id: "gallery",      nav: "Gallery",      show: true  },  // safe to delete · photo grid
     { id: "writing",      nav: "Writing",      show: true  },  // safe to delete
     { id: "testimonials", nav: "References",   show: true  },  // safe to delete
     { id: "contact",      nav: "Contact",      show: true  },
@@ -186,6 +188,24 @@ const SITE = {
       { icon: "folder", text: "Working on a project I'm genuinely excited about." }, // 👉 EDIT
       { icon: "pen",    text: "Learning a new skill, a little bit every day." },
       { icon: "user",   text: "Hoping to meet more people who care about their craft." },
+    ],
+  },
+
+  /* ===================================================================
+     ===== HIGHLIGHTS / STATS  ("by the numbers") — safe to delete ====
+     ===================================================================
+     A row of big numbers that gently count up when scrolled into view.
+     OFF by default — set the "stats" line in the section list above to
+     show: true to switch it on.
+       value · any text — "5+", "100%", "30"
+       label · what the number means */
+  stats: {
+    intro: "A few highlights",
+    items: [
+      { value: "5+",   label: "Years doing what I love" }, // 👉 EDIT
+      { value: "30",   label: "Projects completed" },      // 👉 EDIT
+      { value: "12",   label: "Happy collaborators" },     // 👉 EDIT
+      { value: "100%", label: "Made with care" },          // 👉 EDIT
     ],
   },
 
@@ -323,6 +343,25 @@ const SITE = {
           { type: "source", label: "Source",       url: "" },
         ],
       },
+    ],
+  },
+
+  /* ===================================================================
+     ===== GALLERY  (a photo grid) — safe to delete ===================
+     ===================================================================
+     Click a photo to enlarge it (a simple built-in lightbox). Drop your
+     images in /assets/img and list them here. Square-ish photos look best.
+       image   · the picture path
+       caption · OPTIONAL — shown under the photo and in the viewer ("" hides it) */
+  gallery: {
+    intro: "A few moments & visuals",
+    items: [
+      { image: "assets/img/gallery-1.svg", caption: "Add a caption — or leave it blank" }, // 👉 EDIT
+      { image: "assets/img/gallery-2.svg", caption: "Click a photo to enlarge it" },
+      { image: "assets/img/gallery-3.svg", caption: "" },
+      { image: "assets/img/gallery-4.svg", caption: "Swap these for your own pictures" },
+      { image: "assets/img/gallery-5.svg", caption: "" },
+      { image: "assets/img/gallery-6.svg", caption: "Add or remove as many as you like" },
     ],
   },
 

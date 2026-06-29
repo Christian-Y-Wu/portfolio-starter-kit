@@ -36,6 +36,7 @@ Save the file, then refresh the page in your browser. That's it.
 - 🎨 **4 ready-made colour palettes** — switch by changing one word.
 - 🧭 **A built-in “Start here” helper** right on the page that walks you through your first edits (with one-click colour previews) — and disappears in one line when you're done.
 - 📍 **A reading-progress bar and a side rail** so visitors always see which section they're in and how far down the page they are.
+- 🖼️ **Optional extras** — a **photo gallery** (click to enlarge) and a **“Highlights” counters** section, both ready to use and one line to remove. Plus a way to drop in your own embed (a map, video, or small tool).
 - 🙂 **Generic, anyone-can-use example content** — student, designer, writer, maker, career-changer. It's not tied to any one job, so it's easy to make it *yours*.
 - 🧩 **Every section a portfolio needs**: hero, about, "now", experience, education, skills, projects, writing, references, and contact.
 - ♿ **Accessible & fast** — keyboard-friendly, screen-reader labels, respects "reduce motion", prints as a tidy résumé.
@@ -284,6 +285,34 @@ The contact form is off by default because it needs a free service to receive me
 ### Add your CV
 Replace `assets/cv.pdf` with your real PDF (keep the file name). The hero “Download CV” button already points to it. To hide the button, set `hero.cv.show: false`.
 
+### Use (or remove) the photo gallery
+A **Gallery** section is already included and turned on. Put your images in `assets/img/` and list them under `GALLERY` in `config.js`; visitors can **click any photo to enlarge it**. To remove the gallery completely, find its line in the `sections` list and set `show: false` (or delete the line):
+```js
+{ id: "gallery", nav: "Gallery", show: false },   // hidden
+```
+
+### Show the “Highlights” numbers
+There's a **Highlights** section — big numbers that gently count up as you scroll. It's **off by default**. Turn it on in the `sections` list, then edit the numbers under `STATS`:
+```js
+{ id: "stats", nav: "Highlights", show: true },   // now visible
+```
+
+### Add your own custom section (a small tool, map, or video)
+Want something the template doesn't include — an embedded map, a YouTube video, a booking widget, a CodePen, a tiny tool? You can add one **without touching any code**, straight from `config.js`:
+
+1. Add a line to the `sections` list:
+   ```js
+   { id: "tools", nav: "Tools", show: true },
+   ```
+2. Add a matching block anywhere in `config.js` with an `html` field — paste in the embed code the service gives you:
+   ```js
+   tools: {
+     intro: "A little tool I made",
+     html: '<iframe src="https://www.google.com/maps/embed?pb=..." height="360" loading="lazy"></iframe>',
+   },
+   ```
+That's it — the section appears with your embedded content. (Most maps, videos, and widgets give you an `<iframe>` to paste.) For anything more advanced, or a real backend tool, see [GROWING.md](GROWING.md).
+
 ### Hide the “Start here” helper box
 That friendly box at the top of the page is just for you while you set up. When you're done, remove it for everyone by setting:
 ```js
@@ -304,9 +333,9 @@ repo: {
 
 ## Ideas for more sections (when you're ready)
 
-Your portfolio can grow with you. These are sections people love to add — all using the **same pattern you already have** (one entry in the `sections` list + a matching block of content). Start simple; come back for these later.
+Your portfolio can grow with you. A **photo gallery** and a **“Highlights” numbers** section are already built in (just toggle them in the `sections` list). Here are more that people love to add — all using the **same pattern** (one entry in the `sections` list + a matching block of content). Start simple; come back for these later.
 
-- **📸 Photo gallery** — a grid of your favourite shots or work.
+- **🏆 Awards & recognition** — things you're proud of.
 - **📚 Reading list / bookshelf** — what you're reading or recommend.
 - **🧰 A “/uses” page** — the gear, apps, and setup you use every day.
 - **🗺️ Travel map** — places you've been or want to go.
@@ -341,9 +370,17 @@ When in doubt, **commit your work first** so you can always go back.
 
 ---
 
-## Going further (making it dynamic later)
+## Going further — databases, frameworks, and more
 
-This template is static on purpose — it’s simple, free, and fast. When you’re ready for more (a contact-form backend, pulling projects from GitHub, a real blog, private content, analytics, a PWA…), see **[GROWING.md](GROWING.md)**. It also explains, in plain language, **how to handle passwords and secrets safely** — important reading before you add anything “dynamic”.
+This template is static on purpose — simple, free, fast, and all most portfolios ever need. But it’s built so you can grow **without starting over**. When you’re ready, **[GROWING.md](GROWING.md)** walks you through each step in plain language:
+
+- **A contact-form backend** — Formspree, Netlify Forms, or your own.
+- **Live data** — pull your projects straight from GitHub, or your content from a CMS.
+- **A database** — load your content from a real database or headless CMS instead of `config.js`. The page renders exactly the same; you just change *where the content comes from*.
+- **A framework like React, Vue, Astro, or Next.js** — if you later want lots of interactivity or many pages, you can rebuild the same sections as components. Because your content already lives in one tidy object, it maps neatly onto props/components.
+- **A real blog, private/gated content, analytics, and an installable app (PWA).**
+
+It also explains — in plain words — **how to handle passwords and secrets safely**. Important before anything “dynamic”: a static site is public, so never put secrets in it.
 
 ---
 

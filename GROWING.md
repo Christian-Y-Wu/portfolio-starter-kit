@@ -101,6 +101,32 @@ The **Writing** section ships as static cards. To make it a real blog:
 
 ---
 
+## Using a real database
+
+If you’d rather not edit `config.js` by hand, keep your content in a database or headless CMS and load it at runtime:
+
+- **Headless CMS** (Contentful, Sanity, Storyblok) — friendly editing dashboards; content delivered as JSON.
+- **A hosted database** (Supabase, Firebase) — store your projects/posts in tables and `fetch()` them.
+- **A Google Sheet** — the lightest “database” of all for non-technical edits.
+
+In every case the rendering stays the same — you’re only swapping the **source** of the `SITE` object. ⚠️ If a service needs a secret key, it belongs in a serverless function’s environment variables, never in the page (see the secrets section above).
+
+## Moving to a framework later (React, Vue, Astro, Next.js)
+
+You don’t need a framework for a portfolio — but if you later want lots of interactivity, many pages, or to reuse components across projects, you can graduate to one **without throwing this away**.
+
+Why it’s an easy jump from here:
+- Your content is already separated from the markup — it all lives in one `SITE` object. In a framework, that same object becomes your data / props.
+- Each section is already a small, self-contained renderer. Those map almost one-to-one onto components (`<Hero>`, `<Projects>`, `<Gallery>`…).
+
+A rough path:
+1. Start a new project with your framework’s starter (e.g. `npm create vite@latest`, or `npm create astro@latest`).
+2. Bring your `SITE` object across as data (a JS/TS file, or fetched JSON).
+3. Recreate each section as a component that takes the matching slice of `SITE` as props. Move the CSS over — it’s plain CSS, so it just works (or drop it into CSS modules).
+4. Deploy. Astro and plain Vite sites still ship as static files (great for GitHub Pages / Netlify / Vercel). Next.js is happiest on Vercel.
+
+**When is it worth it?** When you genuinely need real interactivity, many pages, or shared components. Until then, staying static is the right call — it’s faster, cheaper, and simpler.
+
 ## Ideas to extend (start small — here’s how far you could go)
 
 You don’t need any of these. They’re here to show the ceiling is high.
