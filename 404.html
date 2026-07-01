@@ -7,6 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Page not found</title>
   <meta name="robots" content="noindex" />
+  <!-- Same security/rendering hints as index.html (this page is self-contained). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; base-uri 'self'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="color-scheme" content="light dark" />
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
   <script>
     // Match the visitor's light/dark preference so there's no white flash.

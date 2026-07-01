@@ -118,6 +118,15 @@
   // Optional Google Font (skipped for "system"; needs internet to load).
   if (SITE.theme && SITE.theme.font && SITE.theme.font !== "system") {
     const fam = String(SITE.theme.font).trim().replace(/\s+/g, "+");
+    // Warm up the font connections first so the download can start sooner.
+    [["https://fonts.googleapis.com", false], ["https://fonts.gstatic.com", true]]
+      .forEach(function (pair) {
+        const pre = document.createElement("link");
+        pre.rel = "preconnect";
+        pre.href = pair[0];
+        if (pair[1]) pre.crossOrigin = "anonymous";
+        document.head.appendChild(pre);
+      });
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://fonts.googleapis.com/css2?family=" + fam + ":wght@400;500;600;700;800&display=swap";
