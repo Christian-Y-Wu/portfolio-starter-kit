@@ -98,6 +98,7 @@ const SITE = {
     brand: "Alex Doe",       // 👉 EDIT — your name or logo text (top-left)
     showThemeToggle: true,   // the light/dark switch
     showDotRail: true,       // the little dots on the right that show which section you're in (set false to hide)
+    commandPalette: true,    // the quick search (press Ctrl/⌘ + K or "/") — jump anywhere, switch theme, copy email
   },
 
   /* ===================================================================
@@ -305,6 +306,10 @@ const SITE = {
        links · buttons on the card. Set a url to "" to hide that button.
                type can be "demo", "source", or any label you like. */
   projects: {
+    // Clickable tag filters above your projects. They're built AUTOMATICALLY
+    // from the tags you use below (no list to maintain). They only appear
+    // when you have a few different tags — set to false to hide them.
+    filters: true,
     intro: "A few things I've worked on",
     items: [
       {

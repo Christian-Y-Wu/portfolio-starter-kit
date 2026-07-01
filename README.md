@@ -34,6 +34,8 @@ Save the file, then refresh the page in your browser. That's it.
 
 - 📱 **Looks great on phones and laptops** (360px → 1440px), with light & dark mode.
 - 🎨 **4 ready-made colour palettes** — switch by changing one word.
+- ⌨️ **A command palette** (press <kbd>Ctrl/⌘ + K</kbd> or <kbd>/</kbd>, or tap the search button) — jump to any section, flip light/dark, change the accent colour, grab your CV, or copy your email, all from the keyboard. Built automatically from your content.
+- 🏷️ **Filterable projects** — clickable tag chips appear on their own, built from the tags you already write.
 - 🧭 **A built-in “Start here” helper** right on the page that walks you through your first edits (with one-click colour previews) — and disappears in one line when you're done.
 - 📍 **A reading-progress bar and a side rail** so visitors always see which section they're in and how far down the page they are.
 - 🖼️ **Optional extras** — a **photo gallery** (click to enlarge) and a **“Highlights” counters** section, both ready to use and one line to remove. Plus a way to drop in your own embed (a map, video, or small tool).
@@ -241,6 +243,9 @@ In `config.js`, find `PROJECTS`. To add one, copy a whole `{ … }` block (from 
 },
 ```
 
+### Filter projects by tag
+Above your projects, visitors get **clickable filter chips** (`All`, plus one per tag). You don't maintain a list — the chips are built automatically from the `tags` you already write on each project, and they only appear once you've used a couple of different tags. To turn them off, set `filters: false` under `PROJECTS` in `config.js`.
+
 ### Add or remove a job / school
 Same idea: under `EXPERIENCE` or `EDUCATION`, copy a `{ … }` block to add an entry, or delete one to remove it.
 
@@ -281,6 +286,11 @@ The contact form is off by default because it needs a free service to receive me
 1. Create a free form at **[Formspree](https://formspree.io/)** (or use Netlify Forms).
 2. They give you an endpoint like `https://formspree.io/f/abcwxyz`.
 3. In `config.js → CONTACT`, set `form: true` and paste your endpoint into `formAction`. **That `formAction` line is the one thing you must change.**
+
+Once your real endpoint is in place, the form **submits without reloading the page**: visitors see an inline “Thank you!” (or a friendly error), and a hidden spam **honeypot** quietly drops bots. If JavaScript is off, it still works the normal way. Prefer no form at all? Your **email** button and the **“Copy email”** button next to it are always there.
+
+### The command palette (⌘K search)
+Press <kbd>Ctrl/⌘ + K</kbd> or <kbd>/</kbd> — or tap the search button in the navbar — to open a quick search of everything on your site: jump to a section, toggle light/dark, switch the accent colour, download your CV, copy your email, or open a social link. It's **built automatically from `config.js`**, so there's nothing to fill in. To turn it off, set `commandPalette: false` under `NAV`.
 
 ### Add your CV
 Replace `assets/cv.pdf` with your real PDF (keep the file name). The hero “Download CV” button already points to it. To hide the button, set `hero.cv.show: false`.

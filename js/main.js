@@ -81,6 +81,10 @@
     menu: ui('<path d="M4 6h16M4 12h16M4 18h16"/>'),
     close: ui('<path d="M18 6 6 18M6 6l12 12"/>'),
     send: ui('<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/>'),
+    search: ui('<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>'),
+    copy: ui('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
+    check: ui('<path d="M20 6 9 17l-5-5"/>'),
+    palette: ui('<circle cx="13.5" cy="6.5" r=".8" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".8" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".8" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".8" fill="currentColor"/><path d="M12 2a10 10 0 0 0 0 20 2.5 2.5 0 0 0 2-4 2 2 0 0 1 1.5-3.3H18a4 4 0 0 0 4-4A10 10 0 0 0 12 2Z"/>'),
     globe: ui('<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/>'),
     quote: brand('<path d="M9.5 5C6.46 5 4 7.46 4 10.5V19h7v-7H7.5c0-1.66 0-3 2-3V5zm9 0c-3.04 0-5.5 2.46-5.5 5.5V19h7v-7H16.5c0-1.66 0-3 2-3V5z"/>'),
 
@@ -103,8 +107,15 @@
   /* ===================================================================
      THEME, FONT & SEO  (run before rendering to avoid any flash)
      =================================================================== */
-  // Palette (accent colour)
-  root.setAttribute("data-palette", (SITE.theme && SITE.theme.palette) || "slate");
+  // Palette (accent colour). A visitor can switch it live from the command
+  // palette; if they have, honour their saved choice — otherwise use config.
+  const PALETTES = ["slate", "forest", "sunset", "violet"];
+  let savedPalette = null;
+  try { savedPalette = localStorage.getItem("palette"); } catch (e) {}
+  const startPalette = PALETTES.indexOf(savedPalette) > -1
+    ? savedPalette
+    : (SITE.theme && SITE.theme.palette) || "slate";
+  root.setAttribute("data-palette", startPalette);
 
   // Honour a forced light/dark default from config (only if the visitor
   // hasn't already chosen one themselves on a previous visit).
@@ -192,12 +203,18 @@
       .join("");
 
     const showToggle = !SITE.nav || SITE.nav.showThemeToggle !== false;
+    const showCmdk = !SITE.nav || SITE.nav.commandPalette !== false;
 
     return (
       '<div class="navbar__inner">' +
         '<a class="navbar__brand" href="#top">' + esc((SITE.nav && SITE.nav.brand) || "") + "</a>" +
         '<nav aria-label="Sections"><ul class="navbar__links" id="nav-links">' + links + "</ul></nav>" +
         '<div class="navbar__actions">' +
+          (showCmdk
+            ? '<button class="cmdk-open" id="cmdk-open" type="button" aria-label="Search and quick actions" aria-haspopup="dialog" title="Search  (Ctrl / ⌘ + K)">' +
+                icon("search") + '<span class="cmdk-open__hint" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd></span>' +
+              "</button>"
+            : "") +
           '<button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">' + icon("menu") + "</button>" +
           (showToggle
             ? '<button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode"></button>'
@@ -338,15 +355,41 @@
     },
 
     projects: function (d) {
-      return '<div class="projects__grid reveal">' + (d.items || []).map(function (p) {
+      const items = d.items || [];
+
+      // Build the filter bar from the union of every project's tags. It only
+      // shows when it's actually useful (opt-in AND at least two tags exist).
+      let filterBar = "";
+      if (d.filters !== false) {
+        const seen = {};
+        const uniqueTags = [];
+        items.forEach(function (p) {
+          (p.tags || []).forEach(function (t) {
+            const key = String(t).toLowerCase();
+            if (!seen[key]) { seen[key] = true; uniqueTags.push(t); }
+          });
+        });
+        if (uniqueTags.length > 1) {
+          filterBar = '<div class="projects__filters reveal" role="group" aria-label="Filter projects by tag">' +
+            '<button class="filter-btn is-active" type="button" data-filter="*" aria-pressed="true">All</button>' +
+            uniqueTags.map(function (t) {
+              return '<button class="filter-btn" type="button" data-filter="' + esc(String(t).toLowerCase()) +
+                '" aria-pressed="false">' + esc(t) + "</button>";
+            }).join("") +
+          "</div>";
+        }
+      }
+
+      const grid = '<div class="projects__grid reveal">' + items.map(function (p) {
         const linksHtml = (p.links || [])
           .filter(function (l) { return l.url; })
           .map(function (l) {
             return ('<a class="btn btn--ghost btn--small" href="' + esc(l.url) + '"' + extAttr(l.url) + ">" +
               esc(l.label) + (l.type === "source" ? icon("github") : icon("external-link")) + "</a>");
           }).join("");
+        const tagKeys = (p.tags || []).map(function (t) { return String(t).toLowerCase(); }).join("|");
         return (
-          '<article class="project ' + (p.featured ? "project--featured" : "") + '">' +
+          '<article class="project ' + (p.featured ? "project--featured" : "") + '" data-tags="' + esc(tagKeys) + '">' +
             '<div class="project__media"><img src="' + esc(p.image || "assets/img/placeholder.svg") + '" alt="' + esc(p.title) + ' preview" loading="lazy"></div>' +
             '<div class="project__body">' +
               '<h3 class="project__title">' + esc(p.title) + "</h3>" +
@@ -357,6 +400,8 @@
           "</article>"
         );
       }).join("") + "</div>";
+
+      return filterBar + grid;
     },
 
     writing: function (d) {
@@ -390,14 +435,21 @@
             '<div><label for="cf-name">Name</label><input id="cf-name" name="name" type="text" autocomplete="name" required></div>' +
             '<div><label for="cf-email">Email</label><input id="cf-email" name="email" type="email" autocomplete="email" required></div>' +
             '<div><label for="cf-msg">Message</label><textarea id="cf-msg" name="message" required></textarea></div>' +
-            '<button class="btn btn--primary" type="submit">' + icon("send") + "Send message</button>" +
+            // Honeypot: hidden from people, tempting to bots. If it's filled in,
+            // we treat the message as spam. ("_gotcha" is Formspree's field name.)
+            '<div class="hp" aria-hidden="true"><label>Leave this field empty<input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>' +
+            '<button class="btn btn--primary contact-form__submit" type="submit">' + icon("send") + "<span>Send message</span></button>" +
+            '<p class="contact-form__status" role="status" aria-live="polite" hidden></p>' +
           "</form>")
+        : "";
+      const copyBtn = d.email
+        ? '<button class="btn btn--ghost" type="button" data-copy-email="' + esc(d.email) + '" aria-label="Copy email address to clipboard">' + icon("copy") + "<span>Copy email</span></button>"
         : "";
       return (
         '<div class="contact__card reveal">' +
           '<h3 class="contact__heading">' + esc(d.heading) + "</h3>" +
           '<p class="contact__text">' + esc(d.text) + "</p>" +
-          '<div class="contact__actions"><a class="btn btn--primary" href="mailto:' + esc(d.email) + '">' + icon("mail") + esc(d.emailButtonLabel) + "</a></div>" +
+          '<div class="contact__actions"><a class="btn btn--primary" href="mailto:' + esc(d.email) + '">' + icon("mail") + esc(d.emailButtonLabel) + "</a>" + copyBtn + "</div>" +
           '<div class="contact__social">' + socialLinks() + "</div>" +
           form +
         "</div>"
@@ -746,4 +798,345 @@
       });
     });
   }
+
+  /* ===================================================================
+     SHARED HELPERS  (used by the palette, form, and copy button below)
+     =================================================================== */
+
+  // A tiny toast (bottom-centre) that announces itself to screen readers.
+  let toastEl = null, toastTimer = null;
+  function showToast(msg) {
+    if (!toastEl) {
+      toastEl = document.createElement("div");
+      toastEl.className = "toast";
+      toastEl.setAttribute("role", "status");
+      toastEl.setAttribute("aria-live", "polite");
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = msg;
+    void toastEl.offsetWidth;                 // restart the animation if it's already up
+    toastEl.classList.add("is-visible");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("is-visible"); }, 2200);
+  }
+
+  function smoothScrollTo(id) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    if (history.replaceState) history.replaceState(null, "", "#" + id);
+    target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
+  }
+
+  // Switch the accent colour and remember it (like the dark-mode choice).
+  function applyPalette(p) {
+    if (PALETTES.indexOf(p) < 0) return;
+    root.setAttribute("data-palette", p);
+    try { localStorage.setItem("palette", p); } catch (e) {}
+  }
+
+  // Copy text with a graceful fallback for older / non-secure contexts.
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly", "");
+        ta.style.position = "absolute"; ta.style.left = "-9999px";
+        document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); ta.remove();
+        resolve();
+      } catch (e) { reject(e); }
+    });
+  }
+
+  /* ===================================================================
+     COPY-EMAIL BUTTON  (the "Copy email" button in the Contact section)
+     =================================================================== */
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest("[data-copy-email]");
+    if (!btn) return;
+    const email = btn.getAttribute("data-copy-email");
+    copyText(email).then(function () {
+      showToast("Email address copied");
+      const label = btn.querySelector("span");
+      if (label && !btn.dataset.busy) {
+        btn.dataset.busy = "1";
+        const original = label.textContent;
+        label.textContent = "Copied!";
+        setTimeout(function () { label.textContent = original; delete btn.dataset.busy; }, 1400);
+      }
+    }).catch(function () { showToast(email); });
+  });
+
+  /* ===================================================================
+     PROJECT TAG FILTERING
+     =================================================================== */
+  (function setupProjectFilters() {
+    const bar = document.querySelector(".projects__filters");
+    if (!bar) return;
+    const cards = Array.prototype.slice.call(document.querySelectorAll(".project"));
+    const buttons = Array.prototype.slice.call(bar.querySelectorAll(".filter-btn"));
+    bar.addEventListener("click", function (e) {
+      const btn = e.target.closest(".filter-btn");
+      if (!btn) return;
+      const filter = btn.getAttribute("data-filter");
+      buttons.forEach(function (b) {
+        const on = b === btn;
+        b.classList.toggle("is-active", on);
+        b.setAttribute("aria-pressed", String(on));
+      });
+      cards.forEach(function (card) {
+        const tags = card.getAttribute("data-tags") || "";
+        const show = filter === "*" || ("|" + tags + "|").indexOf("|" + filter + "|") > -1;
+        card.hidden = !show;
+        if (show && !reduceMotion) {
+          card.classList.remove("filter-in");
+          void card.offsetWidth;
+          card.classList.add("filter-in");
+        }
+      });
+    });
+  })();
+
+  /* ===================================================================
+     CONTACT FORM  —  submit without leaving the page (progressive
+     enhancement). If anything is off, the browser's normal POST still works.
+     =================================================================== */
+  (function setupContactForm() {
+    const form = document.querySelector(".contact-form");
+    if (!form) return;
+    const action = form.getAttribute("action") || "";
+    // Only take over once the form points at a real endpoint. While the
+    // placeholder is still there, leave the browser's default behaviour alone.
+    if (!/^https?:\/\//i.test(action) || /your-id/.test(action)) return;
+
+    const status = form.querySelector(".contact-form__status");
+    const submit = form.querySelector(".contact-form__submit");
+    const submitLabel = submit ? submit.querySelector("span") : null;
+    const honeypot = form.querySelector('[name="_gotcha"]');
+
+    function setStatus(msg, kind) {
+      if (!status) return;
+      status.textContent = msg;
+      status.hidden = !msg;
+      status.className = "contact-form__status" + (kind ? " is-" + kind : "");
+    }
+    function showSuccess() {
+      form.innerHTML =
+        '<div class="contact-form__done" role="status">' +
+          '<span class="contact-form__done-icon">' + icon("check") + "</span>" +
+          "<p><strong>Thank you!</strong> Your message is on its way — I'll get back to you soon.</p>" +
+        "</div>";
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (honeypot && honeypot.value) { showSuccess(); return; }   // silently drop bots
+      if (form.checkValidity && !form.checkValidity()) { form.reportValidity(); return; }
+
+      const original = submitLabel ? submitLabel.textContent : "";
+      if (submit) submit.disabled = true;
+      if (submitLabel) submitLabel.textContent = "Sending…";
+      setStatus("", "");
+
+      fetch(action, { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } })
+        .then(function (res) {
+          if (res.ok) { showSuccess(); return; }
+          return res.json().then(function (data) {
+            const msg = data && data.errors && data.errors.length
+              ? data.errors.map(function (x) { return x.message; }).join(", ")
+              : "Something went wrong — please try again, or email me directly.";
+            setStatus(msg, "error");
+          });
+        })
+        .catch(function () {
+          setStatus("Network error — please check your connection, or email me directly.", "error");
+        })
+        .then(function () {
+          if (submit) submit.disabled = false;
+          if (submitLabel) submitLabel.textContent = original;
+        });
+    });
+  })();
+
+  /* ===================================================================
+     COMMAND PALETTE  (Ctrl/⌘ + K, "/", or the navbar search button)
+     ---------------------------------------------------------------------
+     A searchable overlay of quick actions — all built from config.js, so
+     there's nothing extra to fill in. Jump to a section, flip the theme,
+     change the accent colour, grab the CV, copy the email, open a social.
+     =================================================================== */
+  (function setupCommandPalette() {
+    if (SITE.nav && SITE.nav.commandPalette === false) return;
+
+    const actions = [];
+
+    (SITE.sections || []).filter(function (s) { return s.show; }).forEach(function (s) {
+      actions.push({ group: "Go to", label: s.nav, icon: "arrow-right", keywords: "section jump navigate " + s.id,
+        run: function () { smoothScrollTo(s.id); } });
+    });
+    actions.push({ group: "Go to", label: "Top of page", icon: "arrow-up", keywords: "home hero start top",
+      run: function () { window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" }); } });
+
+    actions.push({ group: "Theme", label: "Toggle light / dark mode", icon: "moon", keywords: "dark light night day theme mode contrast",
+      run: function () {
+        const t = document.getElementById("theme-toggle");
+        if (t) { t.click(); return; }
+        const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("theme", next); } catch (e) {}
+      } });
+    PALETTES.forEach(function (p) {
+      const name = p.charAt(0).toUpperCase() + p.slice(1);
+      actions.push({ group: "Theme", label: "Accent colour · " + name, icon: "palette", keywords: "colour color accent palette " + p,
+        run: function () { applyPalette(p); showToast("Accent colour: " + name); } });
+    });
+
+    if (SITE.hero && SITE.hero.cv && SITE.hero.cv.show && SITE.hero.cv.file) {
+      actions.push({ group: "Actions", label: SITE.hero.cv.label || "Download CV", icon: "download", keywords: "cv resume download pdf curriculum",
+        run: function () { const a = document.createElement("a"); a.href = SITE.hero.cv.file; a.download = ""; document.body.appendChild(a); a.click(); a.remove(); } });
+    }
+    const email = (SITE.contact && SITE.contact.email) || "";
+    if (email) {
+      actions.push({ group: "Actions", label: "Copy email address", icon: "copy", keywords: "copy email address contact " + email,
+        run: function () { copyText(email).then(function () { showToast("Email address copied"); }).catch(function () { showToast(email); }); } });
+      actions.push({ group: "Actions", label: "Send an email", icon: "mail", keywords: "email mail write message contact " + email,
+        run: function () { window.location.href = "mailto:" + email; } });
+    }
+    (SITE.social || []).filter(function (s) { return s.url && /^https?:\/\//i.test(s.url); }).forEach(function (s) {
+      actions.push({ group: "Links", label: "Open " + (s.label || s.icon), icon: s.icon, keywords: "social open link " + (s.label || "") + " " + s.icon,
+        run: function () { window.open(s.url, "_blank", "noopener"); } });
+    });
+
+    const overlay = document.createElement("div");
+    overlay.className = "cmdk";
+    overlay.hidden = true;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "Search and quick actions");
+    overlay.innerHTML =
+      '<div class="cmdk__panel">' +
+        '<div class="cmdk__search">' + icon("search") +
+          '<input class="cmdk__input" type="text" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list" placeholder="Search sections, theme, links…" autocomplete="off" spellcheck="false">' +
+          '<kbd class="cmdk__esc">Esc</kbd>' +
+        "</div>" +
+        '<ul class="cmdk__list" id="cmdk-list" role="listbox" aria-label="Results"></ul>' +
+        '<div class="cmdk__foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> select</span><span><kbd>esc</kbd> close</span></div>' +
+      "</div>";
+    document.body.appendChild(overlay);
+    const input = overlay.querySelector(".cmdk__input");
+    const list = overlay.querySelector(".cmdk__list");
+
+    let filtered = [];
+    let activeIndex = 0;
+    let lastFocused = null;
+
+    function render(q) {
+      const query = (q || "").trim().toLowerCase();
+      filtered = actions.filter(function (a) {
+        return !query || (a.label + " " + (a.keywords || "") + " " + a.group).toLowerCase().indexOf(query) > -1;
+      });
+      activeIndex = 0;
+      if (!filtered.length) {
+        list.innerHTML = '<li class="cmdk__empty">No matches — try “about”, “dark”, or “email”.</li>';
+        input.removeAttribute("aria-activedescendant");
+        return;
+      }
+      let html = "", lastGroup = null;
+      filtered.forEach(function (a, i) {
+        if (a.group !== lastGroup) { html += '<li class="cmdk__group" role="presentation">' + esc(a.group) + "</li>"; lastGroup = a.group; }
+        html += '<li class="cmdk__item" role="option" id="cmdk-opt-' + i + '" data-i="' + i + '">' +
+          '<span class="cmdk__item-icon">' + icon(a.icon) + "</span>" +
+          '<span class="cmdk__item-label">' + esc(a.label) + "</span></li>";
+      });
+      list.innerHTML = html;
+      paintActive(true);
+    }
+
+    function paintActive(scroll) {
+      const opts = list.querySelectorAll(".cmdk__item");
+      opts.forEach(function (el) {
+        const on = Number(el.getAttribute("data-i")) === activeIndex;
+        el.classList.toggle("is-active", on);
+        if (on) {
+          el.setAttribute("aria-selected", "true");
+          if (scroll) el.scrollIntoView({ block: "nearest" });
+        } else {
+          el.removeAttribute("aria-selected");
+        }
+      });
+      input.setAttribute("aria-activedescendant", filtered.length ? "cmdk-opt-" + activeIndex : "");
+    }
+
+    function move(delta) {
+      if (!filtered.length) return;
+      activeIndex = (activeIndex + delta + filtered.length) % filtered.length;
+      paintActive(true);
+    }
+    function runActive() {
+      const a = filtered[activeIndex];
+      if (!a) return;
+      close();
+      a.run();
+    }
+    function open() {
+      if (!overlay.hidden) return;
+      lastFocused = document.activeElement;
+      overlay.hidden = false;
+      document.body.style.overflow = "hidden";
+      input.value = "";
+      render("");
+      requestAnimationFrame(function () { input.focus(); });
+    }
+    function close() {
+      if (overlay.hidden) return;
+      overlay.hidden = true;
+      document.body.style.overflow = "";
+      if (lastFocused && lastFocused.focus) lastFocused.focus();
+    }
+
+    input.addEventListener("input", function () { render(input.value); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { e.preventDefault(); move(1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); move(-1); }
+      else if (e.key === "Enter") { e.preventDefault(); runActive(); }
+      else if (e.key === "Home") { e.preventDefault(); activeIndex = 0; paintActive(true); }
+      else if (e.key === "End") { e.preventDefault(); activeIndex = Math.max(0, filtered.length - 1); paintActive(true); }
+      else if (e.key === "Tab") { e.preventDefault(); }   // keep focus inside the modal (the input is the only control)
+    });
+    list.addEventListener("click", function (e) {
+      const item = e.target.closest(".cmdk__item");
+      if (!item) return;
+      activeIndex = Number(item.getAttribute("data-i"));
+      runActive();
+    });
+    list.addEventListener("mousemove", function (e) {
+      const item = e.target.closest(".cmdk__item");
+      if (!item) return;
+      const i = Number(item.getAttribute("data-i"));
+      if (i !== activeIndex) { activeIndex = i; paintActive(false); }
+    });
+    overlay.addEventListener("click", function (e) { if (e.target === overlay) close(); });
+
+    function isTyping(el) {
+      if (!el) return false;
+      const tag = (el.tagName || "").toLowerCase();
+      return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
+    }
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !overlay.hidden) { e.preventDefault(); close(); return; }
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        if (overlay.hidden) open(); else close();
+        return;
+      }
+      if (e.key === "/" && overlay.hidden && !isTyping(e.target)) { e.preventDefault(); open(); }
+    });
+    const openBtn = document.getElementById("cmdk-open");
+    if (openBtn) openBtn.addEventListener("click", open);
+  })();
 })();

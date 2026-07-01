@@ -712,6 +712,109 @@ textarea:focus-visible, [tabindex]:focus-visible {
 }
 
 /* =====================================================================
+   21b. COMMAND PALETTE, FILTERS, TOAST  (the newer interactive bits)
+   ===================================================================== */
+
+/* --- the navbar "search / ⌘K" button --------------------------------- */
+.cmdk-open {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  height: 2.4rem; padding: 0 0.55rem 0 0.7rem; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted);
+  cursor: pointer; font: inherit; transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.cmdk-open:hover { background: var(--bg-subtle); color: var(--text); }
+.cmdk-open svg { width: 1.15rem; height: 1.15rem; }
+.cmdk-open__hint { display: inline-flex; gap: 2px; }
+.cmdk-open__hint kbd {
+  font: inherit; font-size: 0.7rem; font-weight: 700; line-height: 1;
+  padding: 0.22rem 0.32rem; border-radius: 5px; color: var(--muted);
+  background: var(--bg-subtle); border: 1px solid var(--border);
+}
+
+/* --- the palette overlay --------------------------------------------- */
+.cmdk {
+  position: fixed; inset: 0; z-index: 400; display: flex;
+  justify-content: center; align-items: flex-start;
+  padding: clamp(1rem, 12vh, 8rem) 1rem 1rem;
+  background: rgba(2, 6, 23, 0.55); backdrop-filter: blur(4px);
+}
+.cmdk[hidden] { display: none; }
+.cmdk__panel {
+  width: 100%; max-width: 560px; max-height: min(70vh, 560px);
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  animation: cmdk-in 0.18s var(--ease);
+}
+@keyframes cmdk-in { from { opacity: 0; transform: translateY(-8px) scale(0.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cmdk__panel { animation: none; } }
+.cmdk__search { display: flex; align-items: center; gap: 0.6rem; padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); }
+.cmdk__search > svg { width: 1.2rem; height: 1.2rem; color: var(--muted); flex: none; }
+.cmdk__input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 1rem; padding: 0.15rem 0; }
+.cmdk__input:focus { outline: none; }
+.cmdk__esc { font: inherit; font-size: 0.7rem; color: var(--muted); padding: 0.2rem 0.4rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-subtle); flex: none; }
+.cmdk__list { list-style: none; margin: 0; padding: 0.4rem; overflow-y: auto; }
+.cmdk__group { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; padding: 0.6rem 0.6rem 0.3rem; }
+.cmdk__item { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0.65rem; border-radius: var(--radius-sm); cursor: pointer; color: var(--text); }
+.cmdk__item-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.9rem; height: 1.9rem; border-radius: 8px; flex: none;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--link);
+}
+.cmdk__item-icon svg { width: 1.05rem; height: 1.05rem; }
+.cmdk__item-label { font-size: 0.95rem; font-weight: 500; }
+.cmdk__item.is-active { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.cmdk__empty { padding: 1.4rem 0.9rem; color: var(--muted); font-size: 0.92rem; text-align: center; }
+.cmdk__foot { display: flex; flex-wrap: wrap; gap: 1rem; padding: 0.6rem 0.95rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.75rem; }
+.cmdk__foot span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.cmdk__foot kbd { font: inherit; font-size: 0.7rem; padding: 0.1rem 0.35rem; border-radius: 5px; border: 1px solid var(--border); background: var(--bg-subtle); }
+
+/* --- project tag filters --------------------------------------------- */
+.projects__filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.4rem; }
+.filter-btn {
+  font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  padding: 0.4rem 0.85rem; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.filter-btn:hover { color: var(--text); background: var(--bg-subtle); }
+.filter-btn.is-active { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+.project[hidden] { display: none; }   /* .project sets display:flex, so [hidden] needs a nudge */
+@media (prefers-reduced-motion: no-preference) {
+  .project.filter-in { animation: filter-in 0.35s var(--ease); }
+}
+@keyframes filter-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* --- toast (little confirmation, e.g. "Email copied") ---------------- */
+.toast {
+  position: fixed; left: 50%; bottom: 1.4rem; z-index: 500;
+  transform: translate(-50%, 1.5rem); max-width: calc(100vw - 2rem);
+  background: var(--text); color: var(--bg);
+  padding: 0.65rem 1.1rem; border-radius: 999px; font-size: 0.9rem; font-weight: 600;
+  box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* --- contact-form extras (honeypot, status, success) ----------------- */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.contact-form__submit[disabled] { opacity: 0.65; cursor: progress; }
+.contact-form__status { font-size: 0.9rem; font-weight: 600; }
+.contact-form__status.is-error { color: #dc2626; }
+:root[data-theme="dark"] .contact-form__status.is-error { color: #f87171; }
+.contact-form__done {
+  display: flex; align-items: center; gap: 0.85rem; text-align: left;
+  padding: 1.1rem 1.2rem; border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 8%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+}
+.contact-form__done-icon {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 2.2rem; height: 2.2rem; border-radius: 999px; background: var(--accent); color: var(--on-accent);
+}
+.contact-form__done-icon svg { width: 1.2rem; height: 1.2rem; }
+
+/* =====================================================================
    22. RESPONSIVE  (phones & tablets)
    ===================================================================== */
 @media (max-width: 880px) {
@@ -719,6 +822,12 @@ textarea:focus-visible, [tabindex]:focus-visible {
   .glance { max-width: 420px; }
   .about__grid { grid-template-columns: 1fr; }
   .about__photo { max-width: 240px; }
+}
+
+/* On phones the "⌘K" hint would crowd the navbar — show just the icon. */
+@media (max-width: 620px) {
+  .cmdk-open__hint { display: none; }
+  .cmdk-open { padding: 0; width: 2.4rem; justify-content: center; }
 }
 
 @media (max-width: 960px) {
@@ -746,7 +855,9 @@ textarea:focus-visible, [tabindex]:focus-visible {
 @media print {
   :root { --bg: #fff; --card: #fff; --text: #000; --muted: #333; --border: #bbb; }
   .navbar, .dot-rail, .back-to-top, .scroll-hint, .skip-link, .guide, .scroll-progress,
-  .hero__cta, .nav-toggle, .contact-form, .footer__credit { display: none !important; }
+  .hero__cta, .nav-toggle, .contact-form, .footer__credit,
+  .cmdk, .cmdk-open, .toast, .projects__filters { display: none !important; }
+  .project[hidden] { display: flex !important; }   /* print every project, ignore any active filter */
   body { font-size: 11pt; line-height: 1.4; }
   .reveal { opacity: 1 !important; transform: none !important; }
   .hero { padding-block: 0.5rem; }
