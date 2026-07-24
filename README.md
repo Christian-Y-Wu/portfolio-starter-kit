@@ -33,7 +33,7 @@ Save the file, then refresh the page in your browser. That's it.
 ## What you get
 
 - 📱 **Looks great on phones and laptops** (360px → 1440px), with light & dark mode.
-- 🎨 **4 ready-made colour palettes** — switch by changing one word.
+- 🎨 **7 ready-made colour palettes + 2 layout styles** — switch by changing one word.
 - ⌨️ **A command palette** (press <kbd>Ctrl/⌘ + K</kbd> or <kbd>/</kbd>, or tap the search button) — jump to any section, flip light/dark, change the accent colour, grab your CV, or copy your email, all from the keyboard. Built automatically from your content.
 - 🏷️ **Filterable projects** — clickable tag chips appear on their own, built from the tags you already write.
 - 🧭 **A built-in “Start here” helper** right on the page that walks you through your first edits (with one-click colour previews) — and disappears in one line when you're done.
@@ -201,11 +201,18 @@ Want `yourname.com` instead of `github.io`? Totally optional.
 Small, copy-pasteable recipes. All edits are in **`config.js`** unless noted.
 
 ### Change the colours
-Easiest of all: on the live site, click the colour buttons in the **“Start here”** box to preview each theme instantly. When you find one you like, set it in `config.js`:
+Easiest of all: on the live site, click the colour buttons in the **“Start here”** box (or open the **⌘K** search and type a colour name) to preview each theme instantly. When you find one you like, set it in `config.js`:
 ```js
-theme: { palette: "forest" },   // "slate" | "forest" | "sunset" | "violet"
+theme: { palette: "forest" },   // "slate" | "forest" | "sunset" | "violet" | "rose" | "ocean" | "mono"
 ```
 Want **custom** colours? Open `css/styles.css` and edit the variables at the very top (section **1. THEME VARIABLES**) — e.g. `--accent`, `--bg`, `--text`. Change one value, refresh, repeat.
+
+### Change the whole look (layout style)
+The palette changes the *colour*; the **style** changes the *shape & feel* — a different “view” of the same content. Preview it from the **“Start here”** box or the **⌘K** palette, then set it in `config.js`:
+```js
+theme: { style: "flat" },   // "soft" (rounded, default) | "flat" (squared, hairline borders, no shadows)
+```
+Adding your own look is a small copy-paste job — see `css/styles.css` section **3b. LAYOUT STYLE** and the [ROADMAP](ROADMAP.md).
 
 ### Change the font
 In `config.js`:
@@ -362,7 +369,7 @@ Your portfolio can grow with you. A **photo gallery** and a **“Highlights” n
 No rush — do these in order, whenever you like:
 
 1. ✏️ **Make it yours** — edit the 6 quick-start fields, then work through the rest of `config.js`.
-2. 🎨 **Pick your look** — try the four palettes, or set your own colours in `css/styles.css`.
+2. 🎨 **Pick your look** — try the seven palettes and two layout styles, or set your own colours in `css/styles.css`.
 3. 🖼️ **Add real images** — your photo, project pictures, a share image, and your CV.
 4. 🌐 **Go live** — deploy to GitHub Pages (steps above).
 5. 🧩 **Add a section or two** — from the ideas just above.
@@ -391,6 +398,8 @@ This template is static on purpose — simple, free, fast, and all most portfoli
 - **A real blog, private/gated content, analytics, and an installable app (PWA).**
 
 It also explains — in plain words — **how to handle passwords and secrets safely**. Important before anything “dynamic”: a static site is public, so never put secrets in it.
+
+**Want to improve the template itself** (or have an AI do it)? The **[ROADMAP](ROADMAP.md)** lists concrete next features — extra layout styles, presets, a testimonials carousel, and more — with pointers to exactly where each one lives.
 
 ---
 

@@ -66,6 +66,7 @@
     "arrow-down": ui('<path d="M12 5v14"/><path d="m5 12 7 7 7-7"/>'),
     "arrow-up": ui('<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>'),
     "chevron-right": ui('<path d="m9 18 6-6-6-6"/>'),
+    "chevron-left": ui('<path d="m15 18-6-6 6-6"/>'),
     "external-link": ui('<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>'),
     download: ui('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>'),
     mail: ui('<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>'),
@@ -109,13 +110,23 @@
      =================================================================== */
   // Palette (accent colour). A visitor can switch it live from the command
   // palette; if they have, honour their saved choice — otherwise use config.
-  const PALETTES = ["slate", "forest", "sunset", "violet"];
+  const PALETTES = ["slate", "forest", "sunset", "violet", "rose", "ocean", "mono"];
   let savedPalette = null;
   try { savedPalette = localStorage.getItem("palette"); } catch (e) {}
   const startPalette = PALETTES.indexOf(savedPalette) > -1
     ? savedPalette
     : (SITE.theme && SITE.theme.palette) || "slate";
   root.setAttribute("data-palette", startPalette);
+
+  // Layout style (the overall "look" — see css section 3b). Same idea as the
+  // palette: a saved choice wins, otherwise config, otherwise the default.
+  const STYLES = ["soft", "flat"];
+  let savedStyle = null;
+  try { savedStyle = localStorage.getItem("style"); } catch (e) {}
+  const startStyle = STYLES.indexOf(savedStyle) > -1
+    ? savedStyle
+    : (SITE.theme && STYLES.indexOf(SITE.theme.style) > -1 ? SITE.theme.style : "soft");
+  root.setAttribute("data-style", startStyle);
 
   // Honour a forced light/dark default from config (only if the visitor
   // hasn't already chosen one themselves on a previous visit).
@@ -514,10 +525,13 @@
   }
   function renderGuide() {
     if (!SITE.guide || SITE.guide.show === false || guideDismissed()) return "";
-    const swatches = ["slate", "forest", "sunset", "violet"].map(function (p) {
+    const swatches = PALETTES.map(function (p) {
       const name = p.charAt(0).toUpperCase() + p.slice(1);
       return '<button type="button" class="guide__swatch" data-palette="' + p + '">' +
         '<span class="guide__swatch-dot guide__swatch-dot--' + p + '"></span>' + name + "</button>";
+    }).join("");
+    const styleSwatches = [["soft", "Soft"], ["flat", "Flat"]].map(function (pair) {
+      return '<button type="button" class="guide__swatch" data-style="' + pair[0] + '">' + pair[1] + "</button>";
     }).join("");
     return (
       '<div class="container">' +
@@ -534,7 +548,11 @@
             '<span class="guide__colours-label">Try a colour theme:</span>' +
             '<div class="guide__swatches">' + swatches + "</div>" +
           "</div>" +
-          '<p class="guide__hint" id="guide-hint">Tip: click a colour to preview it instantly. To keep one, set <code>palette: "…"</code> in <code>config.js</code>.</p>' +
+          '<div class="guide__colours">' +
+            '<span class="guide__colours-label">Try a layout style:</span>' +
+            '<div class="guide__swatches">' + styleSwatches + "</div>" +
+          "</div>" +
+          '<p class="guide__hint" id="guide-hint">Tip: click to preview instantly. To keep a look, set <code>palette</code> / <code>style</code> under <code>theme</code> in <code>config.js</code>.</p>' +
           '<div class="guide__next">' +
             '<p class="guide__next-title">When you\'re ready, you can go further:</p>' +
             '<ul class="guide__next-list">' +
@@ -692,9 +710,20 @@
     sectionEls.forEach(function (s) { spy.observe(s); });
   }
 
-  // ---- Gallery lightbox (click a photo to enlarge it) --------------
-  const galleryItems = document.querySelectorAll(".gallery__item");
+  // ---- Gallery lightbox (click a photo to enlarge it; ← / → to browse) ----
+  const galleryItems = Array.prototype.slice.call(document.querySelectorAll(".gallery__item"));
   if (galleryItems.length) {
+    // Snapshot every photo once, so we can step through them in the viewer.
+    const photos = galleryItems.map(function (btn) {
+      const img = btn.querySelector("img");
+      return {
+        src: btn.getAttribute("data-full"),
+        caption: btn.getAttribute("data-caption") || "",
+        alt: img ? img.alt : "",
+      };
+    });
+    const multiple = photos.length > 1;
+
     const lb = document.createElement("div");
     lb.className = "lightbox";
     lb.hidden = true;
@@ -703,17 +732,27 @@
     lb.setAttribute("aria-label", "Image viewer");
     lb.innerHTML =
       '<button class="lightbox__close" type="button" aria-label="Close image viewer">' + icon("close") + "</button>" +
+      (multiple
+        ? '<button class="lightbox__nav lightbox__nav--prev" type="button" aria-label="Previous photo">' + icon("chevron-left") + "</button>" +
+          '<button class="lightbox__nav lightbox__nav--next" type="button" aria-label="Next photo">' + icon("chevron-right") + "</button>"
+        : "") +
       '<figure class="lightbox__figure"><img class="lightbox__img" alt=""><figcaption class="lightbox__caption"></figcaption></figure>';
     document.body.appendChild(lb);
     const lbImg = lb.querySelector(".lightbox__img");
     const lbCap = lb.querySelector(".lightbox__caption");
     const lbClose = lb.querySelector(".lightbox__close");
     let lastFocused = null;
+    let current = 0;
 
-    function openLightbox(src, caption, alt) {
-      lbImg.src = src; lbImg.alt = alt || caption || "";
-      lbCap.textContent = caption || "";
-      lbCap.style.display = caption ? "" : "none";
+    function showPhoto(i) {
+      current = (i + photos.length) % photos.length;   // wrap around both ends
+      const p = photos[current];
+      lbImg.src = p.src; lbImg.alt = p.alt || p.caption || "";
+      lbCap.textContent = p.caption;
+      lbCap.style.display = p.caption ? "" : "none";
+    }
+    function openLightbox(i) {
+      showPhoto(i);
       lb.hidden = false;
       document.body.style.overflow = "hidden";
       lastFocused = document.activeElement;
@@ -724,15 +763,21 @@
       document.body.style.overflow = "";
       if (lastFocused && lastFocused.focus) lastFocused.focus();
     }
-    galleryItems.forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        const img = btn.querySelector("img");
-        openLightbox(btn.getAttribute("data-full"), btn.getAttribute("data-caption"), img ? img.alt : "");
-      });
+    galleryItems.forEach(function (btn, i) {
+      btn.addEventListener("click", function () { openLightbox(i); });
     });
     lbClose.addEventListener("click", closeLightbox);
     lb.addEventListener("click", function (e) { if (e.target === lb) closeLightbox(); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !lb.hidden) closeLightbox(); });
+    if (multiple) {
+      lb.querySelector(".lightbox__nav--prev").addEventListener("click", function () { showPhoto(current - 1); });
+      lb.querySelector(".lightbox__nav--next").addEventListener("click", function () { showPhoto(current + 1); });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (lb.hidden) return;
+      if (e.key === "Escape") closeLightbox();
+      else if (multiple && e.key === "ArrowLeft") { e.preventDefault(); showPhoto(current - 1); }
+      else if (multiple && e.key === "ArrowRight") { e.preventDefault(); showPhoto(current + 1); }
+    });
   }
 
   // ---- Stats count-up (gentle; respects reduced-motion) ------------
@@ -794,7 +839,18 @@
           b.classList.toggle("is-active", b === btn);
         });
         if (hint) hint.innerHTML =
-          'Nice choice! To keep it, set <code>palette: "' + p + '"</code> in <code>config.js</code> (under THEME).';
+          'Nice choice! To keep it, set <code>palette: "' + p + '"</code> under <code>theme</code> in <code>config.js</code>.';
+      });
+    });
+    guideEl.querySelectorAll("[data-style]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        const s = btn.getAttribute("data-style");
+        root.setAttribute("data-style", s);   // live preview only — config.js is the real setting
+        guideEl.querySelectorAll("[data-style]").forEach(function (b) {
+          b.classList.toggle("is-active", b === btn);
+        });
+        if (hint) hint.innerHTML =
+          'Nice choice! To keep it, set <code>style: "' + s + '"</code> under <code>theme</code> in <code>config.js</code>.';
       });
     });
   }
@@ -834,6 +890,13 @@
     if (PALETTES.indexOf(p) < 0) return;
     root.setAttribute("data-palette", p);
     try { localStorage.setItem("palette", p); } catch (e) {}
+  }
+
+  // Switch the layout style ("soft" / "flat") and remember it.
+  function applyStyle(s) {
+    if (STYLES.indexOf(s) < 0) return;
+    root.setAttribute("data-style", s);
+    try { localStorage.setItem("style", s); } catch (e) {}
   }
 
   // Copy text with a graceful fallback for older / non-secure contexts.
@@ -994,6 +1057,12 @@
       const name = p.charAt(0).toUpperCase() + p.slice(1);
       actions.push({ group: "Theme", label: "Accent colour · " + name, icon: "palette", keywords: "colour color accent palette " + p,
         run: function () { applyPalette(p); showToast("Accent colour: " + name); } });
+    });
+    const STYLE_LABELS = { soft: "Soft (rounded)", flat: "Flat (editorial)" };
+    STYLES.forEach(function (s) {
+      actions.push({ group: "Theme", label: "Layout style · " + (STYLE_LABELS[s] || s), icon: "palette",
+        keywords: "layout style look view shape flat soft rounded editorial minimal " + s,
+        run: function () { applyStyle(s); showToast("Layout style: " + (STYLE_LABELS[s] || s)); } });
     });
 
     if (SITE.hero && SITE.hero.cv && SITE.hero.cv.show && SITE.hero.cv.file) {

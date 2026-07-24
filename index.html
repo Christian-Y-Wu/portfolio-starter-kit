@@ -10,7 +10,7 @@
   ignore this file completely.
   ===========================================================================
 -->
-<html lang="en" data-palette="slate">
+<html lang="en" data-palette="slate" data-style="soft">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -70,17 +70,23 @@
   }
   </script>
 
-  <!-- ===== Anti-flash: set light/dark BEFORE the page paints =============
-       Tiny inline script so dark-mode users never see a white flash.
-       It just reads your saved choice (or your device setting). -->
+  <!-- ===== Anti-flash: set the look BEFORE the page paints ==============
+       Tiny inline script so a returning visitor never sees a flash of the
+       wrong theme/colour. It reads their saved choices (or device setting)
+       and applies them before the first paint. Values are whitelisted so a
+       stray localStorage value can't inject an arbitrary attribute. -->
   <script>
     (function () {
+      var el = document.documentElement;
       try {
         var saved = localStorage.getItem("theme");          // "light" | "dark" | null
         var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        var mode = saved || (prefersDark ? "dark" : "light");
-        document.documentElement.setAttribute("data-theme", mode);
-      } catch (e) { /* private mode / storage off — light is fine */ }
+        el.setAttribute("data-theme", saved || (prefersDark ? "dark" : "light"));
+        var p = localStorage.getItem("palette");            // accent colour
+        if (["slate","forest","sunset","violet","rose","ocean","mono"].indexOf(p) > -1) el.setAttribute("data-palette", p);
+        var s = localStorage.getItem("style");              // layout style
+        if (["soft","flat"].indexOf(s) > -1) el.setAttribute("data-style", s);
+      } catch (e) { /* private mode / storage off — the defaults are fine */ }
     })();
   </script>
 

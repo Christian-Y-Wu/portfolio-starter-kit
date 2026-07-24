@@ -7,7 +7,8 @@
 
    Table of contents:
      1. THEME VARIABLES   ← change colours here (or pick a palette in config.js)
-     2. PALETTES          ← the 4 ready-made accent colours
+     2. PALETTES          ← the 7 ready-made accent colours
+     3b. LAYOUT STYLE     ← "soft" / "flat" — switch the whole look
      3. DARK MODE         ← colours used when dark mode is on
      4. BASE & RESET
      5. LAYOUT HELPERS
@@ -71,15 +72,18 @@
 }
 
 /* =====================================================================
-   2. PALETTES  —  the 4 ready-made looks (choose one in config.js)
+   2. PALETTES  —  the 7 ready-made accent colours (choose one in config.js)
    ---------------------------------------------------------------------
    --accent   = the strong brand colour (buttons, light-mode links)
    --accent-2 = a lighter version (used for links/highlights in dark mode)
    ===================================================================== */
-:root[data-palette="slate"]  { --accent: #4f46e5; --accent-2: #a5b4fc; }  /* indigo */
-:root[data-palette="forest"] { --accent: #15803d; --accent-2: #4ade80; }  /* green  */
-:root[data-palette="sunset"] { --accent: #ea580c; --accent-2: #fb923c; }  /* orange */
-:root[data-palette="violet"] { --accent: #7c3aed; --accent-2: #c4b5fd; }  /* purple */
+:root[data-palette="slate"]  { --accent: #4f46e5; --accent-2: #a5b4fc; }  /* indigo    */
+:root[data-palette="forest"] { --accent: #15803d; --accent-2: #4ade80; }  /* green     */
+:root[data-palette="sunset"] { --accent: #ea580c; --accent-2: #fb923c; }  /* orange    */
+:root[data-palette="violet"] { --accent: #7c3aed; --accent-2: #c4b5fd; }  /* purple    */
+:root[data-palette="rose"]   { --accent: #e11d48; --accent-2: #fb7185; }  /* rose/pink */
+:root[data-palette="ocean"]  { --accent: #0891b2; --accent-2: #22d3ee; }  /* cyan/teal */
+:root[data-palette="mono"]   { --accent: #52525b; --accent-2: #a1a1aa; }  /* neutral   */
 
 /* In light mode, links/highlights use the strong accent. */
 :root { --link: var(--accent); --highlight: var(--accent); }
@@ -103,6 +107,38 @@
   --link: var(--accent-2);
   --highlight: var(--accent-2);
 }
+
+/* =====================================================================
+   3b. LAYOUT STYLE  —  switch the whole "look" (a different view)
+   ---------------------------------------------------------------------
+   The palette above changes the colour; this changes the SHAPE & feel.
+   Pick one in config.js  →  theme.style  ("soft" | "flat"), or try them
+   live from the ⌘K command palette / the "Start here" box.
+
+     soft  · the default — rounded corners and gentle shadows
+     flat  · an editorial look — squared corners, hairline borders,
+             no shadows, and a plain (glow-free) hero
+
+   This block sits AFTER dark mode on purpose, so a flat site stays flat
+   in both light and dark. Add your own variant by copying the pattern. */
+:root[data-style="flat"] {
+  --radius:    8px;
+  --radius-sm: 6px;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+}
+:root[data-style="flat"] .btn,
+:root[data-style="flat"] .pill,
+:root[data-style="flat"] .chip,
+:root[data-style="flat"] .social-link,
+:root[data-style="flat"] .cmdk-open,
+:root[data-style="flat"] .guide__swatch,
+:root[data-style="flat"] .guide__community { border-radius: 8px; }
+:root[data-style="flat"] .hero { background: none; }          /* editorial: drop the glow */
+:root[data-style="flat"] .glance::before { display: none; }   /* and the accent bar on the card */
+/* Give cards a crisper edge now that the shadows are gone. */
+:root[data-style="flat"] .glance { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
 
 /* =====================================================================
    4. BASE & RESET
@@ -513,6 +549,20 @@ textarea:focus-visible, [tabindex]:focus-visible {
 .lightbox__close:hover { background: rgba(255, 255, 255, 0.22); }
 .lightbox__close svg { width: 1.3rem; height: 1.3rem; }
 
+/* Prev / next arrows (only shown when the gallery has more than one photo) */
+.lightbox__nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 2.8rem; height: 2.8rem; display: grid; place-items: center;
+  border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: background 0.15s;
+}
+.lightbox__nav:hover { background: rgba(255, 255, 255, 0.22); }
+.lightbox__nav svg { width: 1.5rem; height: 1.5rem; }
+.lightbox__nav--prev { left: clamp(0.5rem, 3vw, 2rem); }
+.lightbox__nav--next { right: clamp(0.5rem, 3vw, 2rem); }
+@media (max-width: 560px) { .lightbox__nav { width: 2.4rem; height: 2.4rem; } }
+
 /* =====================================================================
    16. WRITING
    ===================================================================== */
@@ -636,6 +686,9 @@ textarea:focus-visible, [tabindex]:focus-visible {
 .guide__swatch-dot--forest { background: #15803d; }
 .guide__swatch-dot--sunset { background: #ea580c; }
 .guide__swatch-dot--violet { background: #7c3aed; }
+.guide__swatch-dot--rose   { background: #e11d48; }
+.guide__swatch-dot--ocean  { background: #0891b2; }
+.guide__swatch-dot--mono   { background: #52525b; }
 .guide__hint { margin-top: 0.9rem; font-size: 0.88rem; color: var(--muted); }
 .guide__next { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px dashed var(--border); }
 .guide__next-title { font-weight: 700; font-size: 0.92rem; }

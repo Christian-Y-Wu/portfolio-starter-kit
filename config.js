@@ -31,7 +31,8 @@
    3. your photo .......... ABOUT → photo  (drop a file in /assets/img)
    4. one project ......... PROJECTS → first item in the list
    5. your email .......... CONTACT → email   (and SOCIAL → mail)
-   6. the accent colour ... THEME → palette   ("slate" "forest" "sunset" "violet")
+   6. the accent colour ... THEME → palette   ("slate" "forest" "sunset" "violet" "rose" "ocean" "mono")
+      (and try THEME → style  "soft" or "flat"  for a whole different look)
 
    The example content below is GENERIC on purpose — it fits anyone
    (student, designer, writer, maker, career-changer…). Replace it with
@@ -49,7 +50,8 @@ const SITE = {
      box on the website. Want fully custom colours? Open css/styles.css
      and edit the variables at the very top — the README shows you how. */
   theme: {
-    palette: "slate",        // 👉 EDIT — "slate" | "forest" | "sunset" | "violet"
+    palette: "slate",        // 👉 EDIT — colour: "slate" "forest" "sunset" "violet" "rose" "ocean" "mono"
+    style: "soft",           // 👉 EDIT — the "look": "soft" (rounded, default) or "flat" (squared/editorial)
     defaultMode: "auto",     // "auto" follows the visitor's device · or force "light" / "dark"
     font: "system",          // "system" (fast, no download) or a Google Font name — see README
   },
